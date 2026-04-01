@@ -15,7 +15,6 @@ import LostFound from './pages/LostFound';
 import Complaints from './pages/Complaints';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import Register from './pages/Register';
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -39,7 +38,6 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="/map" element={<PrivateRoute><Map /></PrivateRoute>} />

@@ -7,7 +7,12 @@ const facultySchema = new mongoose.Schema({
   cabin: { type: String, required: true },
   location: { type: String, required: true },
   status: { type: String, enum: ['Available', 'In Class', 'Busy', 'On Break', 'Away'], default: 'Available' },
-  image: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }
+  image: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' },
+  email: { type: String },
+  phone: { type: String },
+  specialization: { type: String },
+  experience: { type: String },
+  officeHours: { type: String }
 }, { timestamps: true });
 
 const Faculty = mongoose.model('Faculty', facultySchema);

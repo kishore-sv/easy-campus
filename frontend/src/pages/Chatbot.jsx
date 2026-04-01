@@ -1,132 +1,190 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import { Send, Bot, User, Sparkles, ChevronRight } from 'lucide-react';
+import { Send, MessageSquare, User, Bot, Sparkles, Navigation, X, Terminal, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
-    { type: 'bot', text: "Hello! I'm your Easy Campus AI Assistant. How can I help you navigate the campus today?", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+    { role: 'model', text: "Hello! I am your PU AI Assistant. How can I help you navigate Presidency University today? You can ask me about faculty locations, fees, or campus facilities." }
   ]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const scrollRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  const handleSend = async (e) => {
+  useEffect(scrollToBottom, [messages]);
+
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    const userMsg = { type: 'user', text: input, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-    setMessages(prev => [...prev, userMsg]);
+    const userMessage = { role: 'user', text: input };
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5001/api/chatbot/query', { message: input });
-      const botMsg = { type: 'bot', text: res.data.response, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-      setMessages(prev => [...prev, botMsg]);
-    } catch (err) {
-      const errorMsg = { type: 'bot', text: "Sorry, I'm having trouble connecting to my brain right now.", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-      setMessages(prev => [...prev, errorMsg]);
+      const response = await fetch('http://localhost:5001/api/chatbot/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: input,
+          history: messages.slice(-6).map(m => ({ role: m.role, text: m.text }))
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to get AI response. Check your API key.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiMessageContent = "";
+      let buffer = "";
+
+      // Add a placeholder message for AI
+      setMessages(prev => [...prev, { role: 'model', text: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        // Keep the last partial line in the buffer
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') break;
+            
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.text) {
+                aiMessageContent += parsed.text;
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { role: 'model', text: aiMessageContent };
+                  return updated;
+                });
+              }
+            } catch (e) {}
+          }
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { role: 'model', text: `ERROR: ${error.message}` }]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="h-[calc(100vh-180px)] flex flex-col bg-white rounded-[3rem] shadow-2xl shadow-primary/5 border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <div className="px-10 py-6 border-b border-gray-50 flex items-center justify-between bg-primary/5">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-            <Bot size={28} />
+    <div className="max-w-5xl mx-auto h-[calc(100vh-180px)] flex flex-col bg-white rounded-[3.5rem] shadow-2xl border border-gray-100 overflow-hidden relative">
+      {/* Premium Header */}
+      <div className="p-10 border-b border-gray-50 flex items-center justify-between bg-primary relative overflow-hidden">
+        <div className="flex items-center gap-6 relative z-10 text-white">
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-xl shadow-black/10">
+             <Bot size={32} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-dark">Campus Assistant</h2>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Always Online</span>
+            <div className="flex items-center gap-3">
+               <h2 className="text-3xl font-black italic uppercase tracking-tighter">Campus <span className="text-secondary italic">Genius</span></h2>
+               <div className="px-3 py-1 bg-white/10 rounded-full text-[8px] font-black uppercase tracking-widest border border-white/10">v2.5 AI Pro</div>
             </div>
+            <p className="text-white/60 font-bold uppercase tracking-widest text-[10px] mt-1">AI-Powered University Guide • Real-time Sync</p>
           </div>
         </div>
-        <div className="hidden md:flex gap-2">
-           {['Where is Dr. Sunitha?', 'Events this week', 'Is tomorrow a holiday?'].map(tip => (
-             <button 
-               key={tip}
-               onClick={() => setInput(tip)}
-               className="text-xs font-bold bg-white border border-gray-100 px-4 py-2 rounded-full hover:border-primary/30 hover:text-primary transition-all shadow-sm"
-             >
-               {tip}
-             </button>
-           ))}
+        <div className="flex gap-3 relative z-10">
+           <button className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/10"><Terminal size={20}/></button>
+           <button className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/10"><Command size={20}/></button>
         </div>
+        
+        {/* Abstract Background Design */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar bg-gray-50/30">
+      {/* Messages Window */}
+      <div className="flex-1 overflow-y-auto p-12 space-y-10 custom-scrollbar bg-gray-50/30">
         <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div 
-              key={i} 
-              initial={{ opacity: 0, x: msg.type === 'user' ? 20 : -20, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+          {messages.map((m, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-5`}
             >
-              <div className={`max-w-[80%] flex gap-4 ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${msg.type === 'user' ? 'bg-secondary text-white' : 'bg-white text-primary border border-gray-100'}`}>
-                  {msg.type === 'user' ? <User size={20} /> : <Bot size={20} />}
+              {m.role === 'model' && (
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0 mb-1">
+                   <Bot size={18} />
                 </div>
-                <div className={`space-y-1 ${msg.type === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-6 py-4 rounded-3xl shadow-sm leading-relaxed font-medium ${msg.type === 'user' ? 'bg-secondary text-white rounded-tr-none' : 'bg-white text-dark border border-gray-100 rounded-tl-none'}`}>
-                    <p className="whitespace-pre-line">{msg.text}</p>
-                  </div>
-                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-tighter px-2">{msg.time}</p>
+              )}
+              
+              <div
+                className={`max-w-xl p-8 rounded-[2.5rem] shadow-sm relative group overflow-hidden ${
+                  m.role === 'user'
+                    ? 'bg-primary text-white rounded-br-lg shadow-primary/20 shadow-xl'
+                    : 'bg-white border border-gray-100 text-dark rounded-bl-lg shadow-md'
+                }`}
+              >
+                {m.role === 'user' && (
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-xl"></div>
+                )}
+                <div className={`text-base leading-relaxed ${m.role === 'user' ? 'font-bold' : 'font-medium'}`}>
+                  {m.text || (isLoading && i === messages.length - 1 ? "..." : "")}
+                </div>
+                <div className={`text-[8px] font-black uppercase tracking-widest mt-4 opacity-30 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
+                  {m.role === 'user' ? 'Authenticated Student' : 'PU Campus Brain'}
                 </div>
               </div>
+
+              {m.role === 'user' && (
+                <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center text-gray-500 shadow-sm flex-shrink-0 mb-1 border border-white">
+                   <User size={18} />
+                </div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>
-        
-        {loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-             <div className="flex gap-4 items-center bg-white border border-gray-100 px-6 py-4 rounded-3xl shadow-sm">
-                <div className="flex gap-1">
-                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                </div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">AI is thinking...</span>
-             </div>
-          </motion.div>
-        )}
-        <div ref={scrollRef} />
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-8 bg-white border-t border-gray-50">
-        <form onSubmit={handleSend} className="relative group">
-          <input 
-            type="text" 
-            placeholder="Search for faculty, navigate campus, or ask about events..."
-            className="w-full bg-gray-50/50 border border-gray-100 pl-10 pr-24 py-6 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-lg font-medium shadow-inner"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors">
-             <Sparkles size={18} />
+      {/* Input Field */}
+      <div className="p-10 bg-white border-t border-gray-50 relative">
+        {isLoading && (
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary px-6 py-2 rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">
+             Syncing with PU Brain...
           </div>
-          <button 
-            type="submit" 
-            className="absolute right-4 top-1/2 -translate-y-1/2 btn-primary p-3 rounded-2xl"
-            disabled={loading}
-          >
-            <Send size={20} />
-          </button>
+        )}
+        <form onSubmit={handleSendMessage} className="relative max-w-4xl mx-auto flex gap-4">
+           <div className="relative flex-1 group">
+             <div className="absolute inset-y-0 left-8 flex items-center text-gray-400 group-focus-within:text-primary transition-colors">
+               <Sparkles size={20} />
+             </div>
+             <input
+               type="text"
+               placeholder="How do I find a faculty? What is the fee for MBA?"
+               className="w-full pl-20 pr-10 py-6 bg-gray-50/50 border border-transparent rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all font-bold text-gray-700 shadow-inner"
+               value={input}
+               onChange={(e) => setInput(e.target.value)}
+             />
+           </div>
+           <button
+             type="submit"
+             disabled={isLoading}
+             className="w-20 h-20 bg-primary text-white rounded-3xl flex items-center justify-center shadow-xl shadow-primary/20 hover:-translate-y-1 active:scale-95 transition-all disabled:opacity-50"
+           >
+             <Send size={28} />
+           </button>
         </form>
-        <p className="text-center text-[10px] text-gray-300 font-bold uppercase tracking-widest mt-4">Easy Campus AI Assistant V2.1 • Powered by Presidency Logic Engine</p>
       </div>
     </div>
   );

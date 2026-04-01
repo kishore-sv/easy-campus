@@ -54,7 +54,7 @@ const Login = () => {
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={20} />
               <input 
                 type="email" 
-                placeholder="yours@uni.edu"
+                placeholder="name.rollno@presidencyuniversity.in"
                 className="input-field pl-14 py-4 bg-gray-50/50 border-gray-100"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -84,10 +84,10 @@ const Login = () => {
         </form>
 
         <div className="mt-10 text-center space-y-4">
-          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Don't have an account?</p>
-          <Link to="/register" className="inline-flex items-center gap-2 text-primary font-black hover:gap-4 transition-all">
-            Join Easy Campus <ChevronRight size={18} />
-          </Link>
+          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest leading-relaxed">
+            Accounts are pre-provided by administration.<br/>
+            Contact helpdesk if you cannot access.
+          </p>
         </div>
         
         <div className="mt-12 pt-8 border-t border-gray-50">

@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* @import "leaflet/dist/leaflet.css"; */
+
 :root {
   --primary: #4F46E5;
   --secondary: #10B981;
@@ -17,21 +19,32 @@ body {
   @apply bg-white/70 backdrop-blur-md border border-white/20;
 }
 
-.btn-primary {
-  @apply px-4 py-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center font-semibold;
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center font-semibold;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-white text-primary border border-primary/20 rounded-xl hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center font-semibold;
+  }
+  
+  .card {
+    @apply bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all;
+  }
+
+  /* Robust fix for icon overlap site-wide */
+  .relative svg.absolute + input,
+  .relative .lucide.absolute + input,
+  .relative:has(> svg.absolute) input,
+  .relative:has(> .absolute) input {
+    padding-left: 3.5rem !important;
+  }
 }
 
-.btn-secondary {
-  @apply px-4 py-2 bg-white text-primary border border-primary/20 rounded-xl hover:bg-primary/5 transition-all active:scale-95 flex items-center justify-center font-semibold;
-}
-
-.card {
-  @apply bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow;
-}
-
-.input-field {
-  @apply w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all;
-}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

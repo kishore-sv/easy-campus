@@ -54,13 +54,43 @@ npm run dev
 
 ## 🔑 Preloaded Accounts (Pre-built)
 
-### Student Account:
-- **Email:** `student@easycampus.com`
-- **Password:** `studentpassword123`
-
 ### Admin Account:
-- **Email:** `admin@easycampus.com`
-- **Password:** `adminpassword123`
+- **Email:** `admin@gmail.com`
+- **Password:** `admin@123`
+
+### Student Accounts (10):
+Format: `name.rollno@presidencyuniversity.in` | Password: `DD-MM-YYYY`
+
+1. **Aarav Sharma**
+   - Email: `aarav.2024cs001@presidencyuniversity.in`
+   - Password: `12-05-2003`
+2. **Ananya Iyer**
+   - Email: `ananya.2024cs002@presidencyuniversity.in`
+   - Password: `24-08-2003`
+3. **Bikram Das**
+   - Email: `bikram.2024is001@presidencyuniversity.in`
+   - Password: `05-11-2002`
+4. **Chetan Reddy**
+   - Email: `chetan.2024me005@presidencyuniversity.in`
+   - Password: `15-02-2003`
+5. **Divya Nair**
+   - Email: `divya.2024ai008@presidencyuniversity.in`
+   - Password: `30-09-2003`
+6. **Eshan Gupta**
+   - Email: `eshan.2023ec012@presidencyuniversity.in`
+   - Password: `11-01-2002`
+7. **Farhan Khan**
+   - Email: `farhan.2024ds003@presidencyuniversity.in`
+   - Password: `18-06-2003`
+8. **Gauri Patil**
+   - Email: `gauri.2024cv009@presidencyuniversity.in`
+   - Password: `09-03-2003`
+9. **Harsh Vardhan**
+   - Email: `harsh.2024ee015@presidencyuniversity.in`
+   - Password: `21-07-2002`
+10. **Ishani Bose**
+    - Email: `ishani.2024bt004@presidencyuniversity.in`
+    - Password: `03-12-2003`
 
 ---
 
