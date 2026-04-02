@@ -36,6 +36,9 @@ Create a `.env` file inside the `backend/` directory:
 PORT=5001
 MONGODB_URI=mongodb://localhost:27017/easycampus
 JWT_SECRET=campus_secret_key_2024
+NODEMAILER_USER=test@gmail.com
+NODEMAILER_PASS=testpass123
+GEMINI_API_KEY=api_key
 ```
 
 ### 4. Seed Database
